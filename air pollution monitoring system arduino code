@@ -1,0 +1,56 @@
+#include <ESP8266WiFi.h>;
+#include <WiFiClient.h>;
+#include <ThingSpeak.h>;
+#include<DHT.h>
+
+#define DHTPIN A0          
+DHT dht(DHTPIN, DHT11);
+int dhttrigpin=3;
+int gastrigpin=4;
+int buzzer=5;
+const char* ssid = "***********************"; 
+const char* password = "***************"; 
+int gaspin = A0; 
+WiFiClient client;
+ 
+unsigned long myChannelNumber = 1010902; // put your channel number here
+ 
+const char * myWriteAPIKey = "*************";
+ 
+void setup()
+ {
+Serial.begin(9600);
+delay(10);
+dht.begin();
+pinMode(dhttrigpin,OUTPUT);
+pinMode(gastrigpin,OUTPUT);
+pinMode(buzzer,OUTPUT);
+digitalWrite(gastrigpin,LOW);
+  digitalWrite(dhttrigpin,LOW);
+WiFi.begin(ssid, password);
+ThingSpeak.begin(client);
+ }
+void loop()
+{
+  digitalWrite(gastrigpin,HIGH);
+  digitalWrite(dhttrigpin,LOW);
+ delay(100);
+ int val=analogRead(gaspin);
+ 
+ digitalWrite(gastrigpin,LOW);
+ digitalWrite(dhttrigpin,HIGH);
+delay(100);
+ float h = dht.readHumidity();
+float t = dht.readTemperature();
+
+//Serial.print(h);Serial.print("\t");
+//Serial.print(t);Serial.print("\t");
+//Serial.println(val);
+//delay(100); 
+
+ ThingSpeak.writeField(myChannelNumber,1,h, myWriteAPIKey);
+ ThingSpeak.writeField(myChannelNumber,2,t, myWriteAPIKey);
+ ThingSpeak.writeField(myChannelNumber,3,val, myWriteAPIKey);
+ 
+ delay(100);
+ }
